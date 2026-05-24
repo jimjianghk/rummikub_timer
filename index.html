@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Jimmikub Timer</title>
+  <link rel="icon" href="avatars/Jim.png" />
+  <link rel="apple-touch-icon" href="avatars/Jim.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Setup screen -->
+  <section id="setup-screen" class="screen active">
+    <div class="block">
+      <h2>Seat order</h2>
+      <div id="seat-circle" class="seat-circle"></div>
+      <div id="bench" class="bench" hidden></div>
+    </div>
+
+    <div class="block">
+      <h2>First player</h2>
+      <div id="first-picker" class="first-picker"></div>
+    </div>
+
+    <div class="block">
+      <h2>Turn length (seconds)</h2>
+      <div id="duration-presets" class="preset-row">
+        <button type="button" class="preset" data-seconds="60">60</button>
+        <button type="button" class="preset active" data-seconds="90">90</button>
+        <input id="duration-custom" class="preset-input" type="number" min="1" max="600" step="1" inputmode="numeric" enterkeyhint="done" placeholder="Custom" aria-label="Custom seconds" />
+      </div>
+    </div>
+
+    <button id="start-btn" type="button" class="primary-btn" disabled>Start</button>
+  </section>
+
+  <!-- Timer screen -->
+  <section id="timer-screen" class="screen">
+    <button id="back-btn" type="button" class="back-btn" aria-label="Back to setup">‹</button>
+
+    <div id="timer-stage" class="timer-stage">
+      <div class="current-player">
+        <img id="current-avatar" class="avatar-large" alt="" />
+        <div id="current-name" class="current-name"></div>
+      </div>
+
+      <div id="time-display" class="time-display">0:00</div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
