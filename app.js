@@ -4,16 +4,16 @@
 
 const PLAYERS = [
   { id: 'jay',   name: 'Jay',   avatar: 'avatars/Jay.png',
-    bg: 'radial-gradient(circle at 35% 30%, #7CB8F5 0%, #2E6FD1 100%)' },
+    bg: 'radial-gradient(circle at 35% 30%, #6EA8FF 0%, #0057B8 100%)' },
   { id: 'jim',   name: 'Jim',   avatar: 'avatars/Jim.png',
-    bg: 'radial-gradient(circle at 35% 30%, #A8E063 0%, #3B8B2E 100%)' },
+    bg: 'radial-gradient(circle at 35% 30%, #FFD86A 0%, #D79B00 100%)' },
   { id: 'catie', name: 'Catie', avatar: 'avatars/Catie.png',
-    bg: 'radial-gradient(circle at 35% 30%, #F48FB1 0%, #C2185B 100%)' },
+    bg: 'radial-gradient(circle at 35% 30%, #FF6B5F 0%, #D30000 100%)' },
   { id: 'lucas', name: 'Lucas', avatar: 'avatars/Lucas.png',
-    bg: 'radial-gradient(circle at 35% 30%, #FFCC80 0%, #E65100 100%)' },
+    bg: 'radial-gradient(circle at 35% 30%, #6B6258 0%, #201915 100%)' },
 ];
 const JOKER_AVATAR = 'avatars/joker.png';
-const JOKER_BG = 'radial-gradient(circle at 35% 30%, #FFE082 0%, #FF6F00 100%)';
+const JOKER_BG = 'radial-gradient(circle at 35% 30%, #EADCC7 0%, #D30000 100%)';
 
 const STORAGE_KEY = 'jimmikub.settings.v2';
 
@@ -311,7 +311,7 @@ function drawSeatArrow(svg, from, to, offset = 0, gap = ARROW_GAP) {
   line.setAttribute('y1', y1);
   line.setAttribute('x2', baseX);
   line.setAttribute('y2', baseY);
-  line.setAttribute('stroke', '#f4f4ff');
+  line.setAttribute('stroke', '#4c4238');
   line.setAttribute('stroke-width', '2.4');
   line.setAttribute('stroke-linecap', 'round');
   group.appendChild(line);
@@ -322,7 +322,7 @@ function drawSeatArrow(svg, from, to, offset = 0, gap = ARROW_GAP) {
     `${baseX + perpX},${baseY + perpY}`,
     `${baseX - perpX},${baseY - perpY}`,
   ].join(' '));
-  head.setAttribute('fill', '#f4f4ff');
+  head.setAttribute('fill', '#4c4238');
   group.appendChild(head);
 
   svg.appendChild(group);
@@ -581,6 +581,9 @@ function readCustomDuration() {
 function commitCustomDuration({ normalize = false } = {}) {
   const v = readCustomDuration();
   if (v === false) {
+    if (Number.isFinite(state.durationSec) && document.activeElement !== customInput) {
+      return true;
+    }
     clearDurationSelection();
     return true;
   }
@@ -770,7 +773,8 @@ document.addEventListener('visibilitychange', () => {
 // ============================================================
 
 function startGame() {
-  if (!commitCustomDuration({ normalize: true })) {
+  const hasCustomEntry = customInput.value.trim() !== '';
+  if (hasCustomEntry && !commitCustomDuration({ normalize: true })) {
     customInput.reportValidity?.();
     customInput.focus();
     return;
