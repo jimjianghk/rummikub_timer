@@ -772,6 +772,15 @@ document.addEventListener('visibilitychange', () => {
 // Timer
 // ============================================================
 
+function setPageTimerClasses({ warn = false, danger = false, overtime = false } = {}) {
+  document.body.classList.toggle('timer-warn', warn);
+  document.body.classList.toggle('timer-danger', danger);
+  document.body.classList.toggle('timer-overtime', overtime);
+  document.documentElement.classList.toggle('timer-warn', warn);
+  document.documentElement.classList.toggle('timer-danger', danger);
+  document.documentElement.classList.toggle('timer-overtime', overtime);
+}
+
 function startGame() {
   const hasCustomEntry = customInput.value.trim() !== '';
   if (hasCustomEntry && !commitCustomDuration({ normalize: true })) {
@@ -796,6 +805,7 @@ function endGame() {
   cancelAnimationFrame(state.rafId);
   state.rafId = null;
   timerScreen.classList.remove('active', 'warn', 'danger', 'overtime');
+  setPageTimerClasses();
   setupScreen.classList.add('active');
   releaseWakeLock();
 }
@@ -806,6 +816,7 @@ function beginTurn() {
   state.overtime = false;
   state.overtimeChimeAt = 0;
   timerScreen.classList.remove('warn', 'danger', 'overtime');
+  setPageTimerClasses();
   currentAvatar.classList.remove('joker');
 
   const p = PLAYERS.find(pp => pp.id === state.playOrder[state.currentIdx]);
@@ -831,13 +842,17 @@ function tick() {
     timeDisplay.textContent = formatTime(remainingSec);
 
     // Background color cues
-    timerScreen.classList.toggle('warn', remainingSec <= 30 && remainingSec > 10);
-    timerScreen.classList.toggle('danger', remainingSec <= 10);
+    const isWarn = remainingSec <= 30 && remainingSec > 10;
+    const isDanger = remainingSec <= 10;
+    timerScreen.classList.toggle('warn', isWarn);
+    timerScreen.classList.toggle('danger', isDanger);
+    setPageTimerClasses({ warn: isWarn, danger: isDanger });
   } else {
     if (!state.overtime) {
       state.overtime = true;
       timerScreen.classList.remove('warn', 'danger');
       timerScreen.classList.add('overtime');
+      setPageTimerClasses({ overtime: true });
       currentAvatar.src = JOKER_AVATAR;
       currentAvatar.style.background = JOKER_BG;
       currentAvatar.classList.add('joker');

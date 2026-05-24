@@ -12,6 +12,10 @@
   --bad: #d30000;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
+  --timer-warn-bg: #f2c94c;
+  --timer-danger-bg: #c90000;
+  --timer-overtime-bg: #8c0000;
+  --timer-overtime-bg-2: #b40000;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -30,6 +34,15 @@ html, body {
 }
 
 body { overflow: hidden; }
+html.timer-warn,
+body.timer-warn { background: var(--timer-warn-bg); }
+html.timer-danger,
+body.timer-danger { background: var(--timer-danger-bg); }
+html.timer-overtime,
+body.timer-overtime {
+  background: var(--timer-overtime-bg);
+  animation: overtime-pulse 1.6s ease-in-out infinite;
+}
 
 .screen {
   display: none;
@@ -385,19 +398,19 @@ body { overflow: hidden; }
   background: var(--bg);
   transition: background-color 0.4s;
 }
-#timer-screen.warn { background: #f2c94c; }
+#timer-screen.warn { background: var(--timer-warn-bg); }
 #timer-screen.danger {
-  background: #c90000;
+  background: var(--timer-danger-bg);
   color: #fff8ec;
 }
 #timer-screen.overtime {
-  background: #8c0000;
+  background: var(--timer-overtime-bg);
   color: #fff8ec;
   animation: overtime-pulse 1.6s ease-in-out infinite;
 }
 @keyframes overtime-pulse {
-  0%, 100% { background-color: #8c0000; }
-  50% { background-color: #b40000; }
+  0%, 100% { background-color: var(--timer-overtime-bg); }
+  50% { background-color: var(--timer-overtime-bg-2); }
 }
 
 .back-btn {
