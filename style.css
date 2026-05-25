@@ -444,7 +444,7 @@ body.timer-overtime {
 }
 .total-score-table th:first-child,
 .total-score-table td:first-child {
-  width: 72%;
+  width: 56%;
 }
 .score-table th:not(:first-child),
 .score-table td:not(:first-child) {

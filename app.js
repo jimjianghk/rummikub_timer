@@ -702,6 +702,7 @@ function calculateScores(csvText) {
   const players = columns.map(col => ({
     ...col.player,
     total: 0,
+    latest: 0,
     games: 0,
     rankCounts: Array(columns.length).fill(0),
   }));
@@ -722,6 +723,7 @@ function calculateScores(csvText) {
     gameCount++;
     scores.forEach((score, i) => {
       players[i].total += score;
+      players[i].latest = score;
       players[i].games++;
       const rank = 1 + scores.filter(otherScore => otherScore > score).length;
       players[i].rankCounts[rank - 1]++;
@@ -790,6 +792,7 @@ function renderScores({ players, gameCount, skippedRows }) {
         <tr>
           <th>Player</th>
           <th>Total</th>
+          <th>Latest</th>
         </tr>
       </thead>
       <tbody>
@@ -797,6 +800,7 @@ function renderScores({ players, gameCount, skippedRows }) {
           <tr>
             <td>${playerCell(player)}</td>
             <td class="numeric">${formatSignedNumber(player.total)}</td>
+            <td class="numeric">${formatSignedNumber(player.latest)}</td>
           </tr>
         `).join('')}
       </tbody>
