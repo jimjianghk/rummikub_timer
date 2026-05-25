@@ -16,6 +16,7 @@ const JOKER_AVATAR = 'avatars/joker.png';
 const JOKER_BG = 'radial-gradient(circle at 35% 30%, #EADCC7 0%, #D30000 100%)';
 
 const STORAGE_KEY = 'jimmikub.settings.v2';
+const SCORE_CSV_URL = 'score.csv';
 
 // ------------ State ------------
 const state = {
@@ -47,7 +48,10 @@ function rotatedOrder() {
 // ------------ DOM ------------
 const $ = (sel) => document.querySelector(sel);
 const setupScreen = $('#setup-screen');
+const scoresScreen = $('#scores-screen');
 const timerScreen = $('#timer-screen');
+const showScoresBtn = $('#show-scores-btn');
+const scoresBackBtn = $('#scores-back-btn');
 const seatCircle = $('#seat-circle');
 const benchEl = $('#bench');
 const firstPicker = $('#first-picker');
@@ -59,6 +63,10 @@ const timerStage = $('#timer-stage');
 const currentAvatar = $('#current-avatar');
 const currentName = $('#current-name');
 const timeDisplay = $('#time-display');
+const scoresMeta = $('#scores-meta');
+const scoresStatus = $('#scores-status');
+const totalScoreList = $('#total-score-list');
+const rankPercentTable = $('#rank-percent-table');
 
 // ============================================================
 // Setup screen
@@ -623,6 +631,232 @@ function syncDurationUI() {
 }
 
 // ============================================================
+// Scores
+// ============================================================
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (inQuotes) {
+      if (ch === '"' && next === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cell += ch;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (ch === '\n') {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else if (ch !== '\r') {
+      cell += ch;
+    }
+  }
+
+  row.push(cell);
+  rows.push(row);
+  return rows;
+}
+
+function playerForScoreName(name) {
+  const key = name.trim().toLowerCase();
+  return PLAYERS.find(p => p.name.toLowerCase() === key) ?? {
+    id: key.replace(/[^a-z0-9]+/g, '-'),
+    name: name.trim(),
+    avatar: JOKER_AVATAR,
+    bg: JOKER_BG,
+  };
+}
+
+function calculateScores(csvText) {
+  const rows = parseCsv(csvText)
+    .map(r => r.map((cell, i) => (i === 0 ? cell.replace(/^\uFEFF/, '') : cell).trim()))
+    .filter(r => r.some(cell => cell !== ''));
+
+  if (rows.length < 2) {
+    return { players: [], gameCount: 0, skippedRows: rows.length === 0 ? 0 : rows.length - 1 };
+  }
+
+  const columns = rows[0]
+    .map((name, index) => ({ name, index, player: playerForScoreName(name) }))
+    .filter(col => col.name !== '');
+
+  const players = columns.map(col => ({
+    ...col.player,
+    total: 0,
+    games: 0,
+    rankCounts: Array(columns.length).fill(0),
+  }));
+
+  let gameCount = 0;
+  let skippedRows = 0;
+
+  rows.slice(1).forEach((row) => {
+    const scores = columns.map((col) => {
+      const raw = row[col.index]?.trim() ?? '';
+      return raw === '' ? NaN : Number(raw);
+    });
+    if (scores.length === 0 || scores.some(score => !Number.isFinite(score))) {
+      skippedRows++;
+      return;
+    }
+
+    gameCount++;
+    scores.forEach((score, i) => {
+      players[i].total += score;
+      players[i].games++;
+      const rank = 1 + scores.filter(otherScore => otherScore > score).length;
+      players[i].rankCounts[rank - 1]++;
+    });
+  });
+
+  players.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+  return { players, gameCount, skippedRows };
+}
+
+function ordinal(n) {
+  const suffix = n % 10 === 1 && n % 100 !== 11 ? 'st'
+    : n % 10 === 2 && n % 100 !== 12 ? 'nd'
+    : n % 10 === 3 && n % 100 !== 13 ? 'rd'
+    : 'th';
+  return `${n}${suffix}`;
+}
+
+function formatSignedNumber(value) {
+  return value > 0 ? `+${value}` : `${value}`;
+}
+
+function formatPercent(count, total) {
+  if (!total) return '0%';
+  return `${((count / total) * 100).toFixed(1)}%`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function setScoresStatus(message, isError = false) {
+  scoresStatus.hidden = !message;
+  scoresStatus.textContent = message;
+  scoresStatus.classList.toggle('error', isError);
+}
+
+function playerCell(player) {
+  return `
+    <div class="score-player">
+      <img class="avatar" src="${player.avatar}" alt="" style="background: ${player.bg};" />
+      <span class="name">${escapeHtml(player.name)}</span>
+    </div>
+  `;
+}
+
+function renderScores({ players, gameCount, skippedRows }) {
+  scoresMeta.textContent = gameCount === 1 ? '1 game' : `${gameCount} games`;
+  setScoresStatus(skippedRows > 0 ? `${skippedRows} row${skippedRows === 1 ? '' : 's'} skipped` : '');
+
+  if (gameCount === 0 || players.length === 0) {
+    totalScoreList.innerHTML = '';
+    rankPercentTable.innerHTML = '';
+    setScoresStatus('No valid score rows found.', true);
+    return;
+  }
+
+  totalScoreList.innerHTML = `
+    <table class="score-table total-score-table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${players.map(player => `
+          <tr>
+            <td>${playerCell(player)}</td>
+            <td class="numeric">${formatSignedNumber(player.total)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+  const rankHeaders = players.map((_, i) => `<th>${ordinal(i + 1)}</th>`).join('');
+  rankPercentTable.innerHTML = `
+    <table class="score-table rank-table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          ${rankHeaders}
+        </tr>
+      </thead>
+      <tbody>
+        ${players.map(player => `
+          <tr>
+            <td>${playerCell(player)}</td>
+            ${player.rankCounts.map(count => `<td class="numeric">${formatPercent(count, gameCount)}</td>`).join('')}
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderScoresLoading() {
+  scoresMeta.textContent = 'Loading';
+  setScoresStatus('');
+  totalScoreList.innerHTML = '';
+  rankPercentTable.innerHTML = '';
+}
+
+async function loadScores() {
+  renderScoresLoading();
+  try {
+    const response = await fetch(`${SCORE_CSV_URL}?v=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    renderScores(calculateScores(await response.text()));
+  } catch {
+    scoresMeta.textContent = 'Unavailable';
+    totalScoreList.innerHTML = '';
+    rankPercentTable.innerHTML = '';
+    setScoresStatus('Could not load score.csv.', true);
+  }
+}
+
+function showScores() {
+  setupScreen.classList.remove('active');
+  scoresScreen.classList.add('active');
+  loadScores();
+}
+
+function hideScores() {
+  scoresScreen.classList.remove('active');
+  setupScreen.classList.add('active');
+}
+
+// ============================================================
 // Audio — Web Audio API generated chimes
 // ============================================================
 
@@ -899,6 +1133,8 @@ backBtn.addEventListener('click', (e) => {
 });
 
 startBtn.addEventListener('click', startGame);
+showScoresBtn.addEventListener('click', showScores);
+scoresBackBtn.addEventListener('click', hideScores);
 
 // ============================================================
 // Init

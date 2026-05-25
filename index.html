@@ -17,7 +17,9 @@
 <body>
   <!-- Setup screen -->
   <section id="setup-screen" class="screen active">
-    <img class="page-joker" src="avatars/joker.png?v=2" alt="Joker" />
+    <button id="show-scores-btn" class="joker-toggle" type="button" aria-label="Show scores">
+      <img class="page-joker" src="avatars/joker.png?v=2" alt="" />
+    </button>
 
     <div class="block">
       <h2>Seat order</h2>
@@ -40,6 +42,30 @@
     </div>
 
     <button id="start-btn" type="button" class="primary-btn" disabled>Start</button>
+  </section>
+
+  <!-- Scores screen -->
+  <section id="scores-screen" class="screen">
+    <button id="scores-back-btn" class="joker-toggle" type="button" aria-label="Back to timer">
+      <img class="page-joker" src="avatars/joker.png?v=2" alt="" />
+    </button>
+
+    <div class="scores-heading">
+      <h1>Leaderboard</h1>
+      <div id="scores-meta" class="scores-meta">Loading</div>
+    </div>
+
+    <div id="scores-status" class="score-status" hidden></div>
+
+    <div class="block score-block">
+      <h2>Total score</h2>
+      <div id="total-score-list" class="score-table-wrap"></div>
+    </div>
+
+    <div class="block score-block">
+      <h2>Finish percentage</h2>
+      <div id="rank-percent-table" class="score-table-wrap"></div>
+    </div>
   </section>
 
   <!-- Timer screen -->
