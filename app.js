@@ -8,7 +8,7 @@ const PLAYERS = [
   { id: 'jim',   name: 'Jim',   avatar: 'avatars/Jim.png',
     bg: 'radial-gradient(circle at 35% 30%, #FFD86A 0%, #D79B00 100%)' },
   { id: 'catie', name: 'Catie', avatar: 'avatars/Catie.png',
-    bg: 'radial-gradient(circle at 35% 30%, #FF6B5F 0%, #D30000 100%)' },
+    bg: 'radial-gradient(circle at 35% 30%, #7ED957 0%, #168A32 100%)' },
   { id: 'lucas', name: 'Lucas', avatar: 'avatars/Lucas.png',
     bg: 'radial-gradient(circle at 35% 30%, #6B6258 0%, #201915 100%)' },
 ];
