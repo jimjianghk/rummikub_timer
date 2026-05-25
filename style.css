@@ -77,13 +77,13 @@ body.timer-overtime {
 }
 
 .joker-toggle {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  max-width: 40px;
-  min-height: 40px;
-  max-height: 40px;
-  flex: 0 0 40px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  flex: 0 0 48px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -338,6 +338,10 @@ body.timer-overtime {
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
+.duration-block .preset-row {
+  width: 90%;
+  margin: 0 auto;
+}
 .preset, .preset-input {
   display: block;
   width: 100%;
@@ -353,6 +357,12 @@ body.timer-overtime {
   font-family: inherit;
   min-width: 0;
   margin: 0;
+}
+.duration-block .preset,
+.duration-block .preset-input {
+  padding: 10px 4px;
+  border-radius: 9px;
+  font-size: 14px;
 }
 .preset { cursor: pointer; }
 .preset.active,
