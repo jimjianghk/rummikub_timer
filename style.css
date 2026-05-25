@@ -18,6 +18,12 @@
   --timer-overtime-bg-2: #b40000;
 }
 
+@font-face {
+  font-family: "Leaderboard Display";
+  src: url("UKIJEsT.ttf") format("truetype");
+  font-display: swap;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body {
@@ -394,14 +400,17 @@ body.timer-overtime {
   margin: 0 0 10px;
 }
 .scores-heading h1 {
-  font-size: 26px;
+  font-family: "Leaderboard Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #CA0000;
+  font-size: 34px;
+  font-kerning: normal;
   line-height: 1;
   margin: 0 0 4px;
-  letter-spacing: 0;
+  letter-spacing: -1.5px;
 }
 .scores-meta {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
